@@ -44,7 +44,6 @@ import com.example.myapplication.AuthViewModel
 import com.example.myapplication.R
 import com.example.myapplication.Todo
 import com.example.myapplication.TodoViewModel
-import com.example.myapplication.getFakeTodo
 import java.text.SimpleDateFormat
 import java.util.Locale
 
