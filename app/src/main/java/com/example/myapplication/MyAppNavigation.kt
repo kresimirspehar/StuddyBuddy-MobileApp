@@ -17,6 +17,7 @@ import com.example.myapplication.pages.SignupPage
 
 
 import androidx.navigation.NavHostController
+import com.example.myapplication.pages.Profile
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -38,6 +39,9 @@ fun MyAppNavigation(
         }
         composable("progress") {
             Progress(modifier, navController, authViewModel)
+        }
+        composable("profile") {
+            Profile(modifier, navController, authViewModel)
         }
     }
 }
