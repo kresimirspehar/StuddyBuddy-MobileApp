@@ -3,6 +3,7 @@ package com.example.myapplication.pages
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 
@@ -46,6 +47,8 @@ import com.example.myapplication.Todo
 import com.example.myapplication.TodoViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
+
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -92,62 +95,78 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TodoListPage(viewModel: TodoViewModel) {
-
     val todoList by viewModel.todoList.observeAsState()
-    var inputText by remember {
-        mutableStateOf("")
-    }
+    var inputText by remember { mutableStateOf("") }
+    var editingItem by remember { mutableStateOf<Todo?>(null) } // Stanje za trenutno uređivanje
 
     Column(
         modifier = Modifier
             .fillMaxHeight()
             .padding(8.dp)
     ) {
-
-        Row (
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
-        ){
-            OutlinedTextField(value = inputText , onValueChange = {
-                inputText = it
-            } )
-            Button(onClick = {
-                viewModel.addTodo(inputText)
-                inputText = ""
-            }) {
+        ) {
+            OutlinedTextField(
+                value = inputText,
+                onValueChange = { inputText = it }
+            )
+            Button(
+                onClick = {
+                    viewModel.addTodo(inputText)
+                    inputText = ""
+                }
+            ) {
                 Text(text = "Add")
             }
-
         }
 
         todoList?.let {
             LazyColumn(
                 content = {
-                    itemsIndexed(it) {
-                            index: Int, item: Todo ->
-                        TodoItem(item = item, onDelete = {
-                            viewModel.deleteTodo(item.id)
-                        })
-
+                    itemsIndexed(it) { index: Int, item: Todo ->
+                        TodoItem(
+                            item = item,
+                            isEditing = editingItem == item,
+                            onEdit = { editingItem = item },
+                            onSave = { newText ->
+                                viewModel.updateTodo(item.copy(title = newText)) // Ažuriraj naziv stavke
+                                editingItem = null // Zatvori uređivanje
+                            },
+                            onCancel = {
+                                editingItem = null // Zatvori uređivanje bez spremanja
+                            },
+                            onDelete = {
+                                viewModel.deleteTodo(item.id)
+                            }
+                        )
                     }
                 }
             )
-        }?: Text(
+        } ?: Text(
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             text = "No items yet",
-            fontSize = 16.sp)
-
-
-
+            fontSize = 16.sp
+        )
     }
 }
 
 @Composable
-fun TodoItem(item: Todo, onDelete : ()-> Unit) {
-    Row (
+fun TodoItem(
+    item: Todo,
+    isEditing: Boolean,
+    onEdit: () -> Unit,
+    onSave: (String) -> Unit,
+    onCancel: () -> Unit,
+    onDelete: () -> Unit
+) {
+    var editText by remember { mutableStateOf(item.title) } // Za praćenje unosa uređivanja
+
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
@@ -156,24 +175,48 @@ fun TodoItem(item: Todo, onDelete : ()-> Unit) {
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
-            Text(text = SimpleDateFormat("HH:mm:aa, dd/mm", Locale.ENGLISH).format(item.createdAt),
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = SimpleDateFormat("HH:mm:aa, dd/mm", Locale.ENGLISH).format(item.createdAt),
                 fontSize = 12.sp,
                 color = Color.LightGray
             )
-            Text(text = item.title,
-                fontSize = 20.sp,
-                color = Color.White
+            if (isEditing) {
+                // Prikazuj OutlinedTextField kad uređujemo stavku
+                OutlinedTextField(
+                    value = editText,
+                    onValueChange = { editText = it },
+                    modifier = Modifier.fillMaxWidth()
                 )
+                Row {
+                    IconButton(onClick = { onSave(editText) }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_check_24), // Zamijenite s ikonom kvačice
+                            contentDescription = "Save"
+                        )
+                    }
+                    IconButton(onClick = onCancel) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_cancel_24), // Zamijenite s ikonom za poništavanje
+                            contentDescription = "Cancel"
+                        )
+                    }
+                }
+            } else {
+                // Prikazuj samo naziv stavke kad ne uređujemo
+                Text(
+                    text = item.title,
+                    fontSize = 20.sp,
+                    color = Color.White,
+                    modifier = Modifier.clickable { onEdit() } // Klik za uređivanje
+                )
+            }
         }
         IconButton(onClick = onDelete) {
             Icon(
                 painter = painterResource(id = R.drawable.baseline_delete_24),
-                contentDescription = "Delete")
-                
-
+                contentDescription = "Delete"
+            )
         }
     }
 }
