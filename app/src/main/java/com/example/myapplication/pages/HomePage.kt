@@ -98,6 +98,7 @@ fun TodoListPage(viewModel: TodoViewModel) {
     val todoList by viewModel.todoList.observeAsState()
     var inputText by remember { mutableStateOf("") }
     var editingItem by remember { mutableStateOf<Todo?>(null) } // Stanje za trenutno uređivanje
+    var showError by remember { mutableStateOf(false) } // Stanje za prikaz greške
 
     Column(
         modifier = Modifier
@@ -112,16 +113,35 @@ fun TodoListPage(viewModel: TodoViewModel) {
         ) {
             OutlinedTextField(
                 value = inputText,
-                onValueChange = { inputText = it }
+                onValueChange = {
+                    inputText = it
+                    showError = false // Sakrij grešku kad korisnik menja unos
+                },
+                isError = showError, // Postavi grešku ako je potrebno
+                placeholder = { Text("Enter a todo item") }
             )
             Button(
                 onClick = {
-                    viewModel.addTodo(inputText)
-                    inputText = ""
+                    if (inputText.trim().isNotEmpty()) {
+                        viewModel.addTodo(inputText)
+                        inputText = ""
+                        showError = false
+                    } else {
+                        showError = true // Prikaz greške ako je unos prazan
+                    }
                 }
             ) {
                 Text(text = "Add")
             }
+        }
+
+        if (showError) {
+            Text(
+                text = "Todo item cannot be empty",
+                color = Color.Red,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(8.dp)
+            )
         }
 
         todoList?.let {
@@ -154,6 +174,7 @@ fun TodoListPage(viewModel: TodoViewModel) {
         )
     }
 }
+
 
 @Composable
 fun TodoItem(
