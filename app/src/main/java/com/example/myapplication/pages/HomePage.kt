@@ -54,6 +54,15 @@ import com.example.myapplication.TodoViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Checkbox
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Checkbox
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.text.style.TextDecoration
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -192,23 +201,31 @@ fun TodoItem(
     var editText by remember { mutableStateOf(item.title) }
     var showDialog by remember { mutableStateOf(false) }
     var isNotificationActive by remember { mutableStateOf(false) }
+    var isChecked by remember { mutableStateOf(false) } // Stanje za checkbox
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.primary)
+            .background(
+                if (isChecked) Color.Gray else MaterialTheme.colorScheme.primary
+            ) // Boja se menja kada je checkbox označen
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        Checkbox(
+            checked = isChecked,
+            onCheckedChange = { isChecked = it } // Oznaci ili poništi checkbox
+        )
+
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = SimpleDateFormat("HH:mm:aa, dd/MM", Locale.ENGLISH).format(item.createdAt),
                 fontSize = 12.sp,
-                color = Color.LightGray
+                color = if (isChecked) Color.DarkGray else Color.LightGray
             )
-            if (isEditing) {
+            if (isEditing && !isChecked) {
                 OutlinedTextField(
                     value = editText,
                     onValueChange = { editText = it },
@@ -232,13 +249,15 @@ fun TodoItem(
                 Text(
                     text = item.title,
                     fontSize = 20.sp,
-                    color = Color.White,
-                    modifier = Modifier.clickable { onEdit() }
+                    color = if (isChecked) Color.Gray else Color.White,
+                    textDecoration = if (isChecked) TextDecoration.LineThrough else TextDecoration.None,
+                    modifier = Modifier
+                        .clickable(enabled = !isChecked) { onEdit() } // Onemogući klik ako je checkbox označen
                 )
             }
         }
 
-        IconButton(onClick = { showDialog = true }) {
+        IconButton(onClick = { showDialog = true }, enabled = !isChecked) { // Onemogući dugme za notifikacije
             Icon(
                 painter = painterResource(id = R.drawable.baseline_notifications_24),
                 contentDescription = "Notify"
@@ -293,7 +312,7 @@ fun TodoItem(
             )
         }
 
-        IconButton(onClick = onDelete) {
+        IconButton(onClick = onDelete, enabled = !isChecked) { // Onemogući dugme za brisanje
             Icon(
                 painter = painterResource(id = R.drawable.baseline_delete_24),
                 contentDescription = "Delete"
