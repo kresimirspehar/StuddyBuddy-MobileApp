@@ -37,6 +37,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.ui.theme.MyApplicationTheme
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.compose.currentBackStackEntryAsState
 
 data class BottomNavigationItem(
     val title: String,
@@ -85,41 +89,47 @@ class MainActivity : ComponentActivity() {
             MyApplicationTheme {
                 Scaffold(
                     bottomBar = {
-                        NavigationBar {
-                            items.forEachIndexed { index, item ->
-                                NavigationBarItem(
-                                    selected = selectedItemIndex == index,
-                                    onClick = {
-                                        selectedItemIndex = index
-                                        // Navigacija unutar donjeg navigacionog bara
-                                        navController.navigate(item.title) {
-                                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                        // Pratimo promenu trenutne destinacije
+                        val currentBackStackEntry = navController.currentBackStackEntryAsState().value
+                        val currentDestination = currentBackStackEntry?.destination?.route
+
+                        // Prikazujemo bottom bar samo ako trenutna ruta nije login ili signup
+                        if (currentDestination != "login" && currentDestination != "signup") {
+                            NavigationBar {
+                                items.forEachIndexed { index, item ->
+                                    NavigationBarItem(
+                                        selected = selectedItemIndex == index,
+                                        onClick = {
+                                            selectedItemIndex = index
+                                            navController.navigate(item.title) {
+                                                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                            }
+                                        },
+                                        label = { Text(text = item.title) },
+                                        icon = {
+                                            BadgedBox(badge = {}) {
+                                                Icon(
+                                                    imageVector = if (index == selectedItemIndex) {
+                                                        item.selectedIcon
+                                                    } else item.unselectedIcon,
+                                                    contentDescription = item.title
+                                                )
+                                            }
                                         }
-                                    },
-                                    label = { Text(text = item.title) },
-                                    icon = {
-                                        BadgedBox (badge = {}){
-                                            Icon(
-                                                imageVector = if (index == selectedItemIndex) {
-                                                    item.selectedIcon
-                                                } else item.unselectedIcon,
-                                                contentDescription = item.title
-                                            )
-                                        }
-                                    }
-                                )
+                                    )
+                                }
                             }
                         }
                     },
                     modifier = Modifier.fillMaxSize()
                 ) { innerPadding ->
-                    // Pozivamo MyAppNavigation unutar Scaffold-a i prosleđujemo navController
                     MyAppNavigation(
                         modifier = Modifier.padding(innerPadding),
                         authViewModel = authViewModel,
-                        navController = navController // Prosleđujemo navController iz MainActivity
+                        navController = navController
                     )
                 }
+
             }
         }
     }
