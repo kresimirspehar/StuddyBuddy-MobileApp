@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -16,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,8 +48,6 @@ import com.example.myapplication.TodoViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomePage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel) {
@@ -57,7 +55,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
     val authState = authViewModel.authState.observeAsState()
 
     LaunchedEffect(authState.value) {
-        when(authState.value) {
+        when (authState.value) {
             is AuthState.Unauthenticated -> navController.navigate("login")
             else -> Unit
         }
@@ -90,8 +88,6 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
     }
 }
 
-
-//Mozda ovaj refactor modifier nece radit pa samo CTRL Z
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TodoListPage(viewModel: TodoViewModel) {
@@ -175,7 +171,6 @@ fun TodoListPage(viewModel: TodoViewModel) {
     }
 }
 
-
 @Composable
 fun TodoItem(
     item: Todo,
@@ -186,6 +181,7 @@ fun TodoItem(
     onDelete: () -> Unit
 ) {
     var editText by remember { mutableStateOf(item.title) } // Za praćenje unosa uređivanja
+    var showDialog by remember { mutableStateOf(false) } // Stanje za prikaz dijaloga
 
     Row(
         modifier = Modifier
@@ -198,7 +194,7 @@ fun TodoItem(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = SimpleDateFormat("HH:mm:aa, dd/mm", Locale.ENGLISH).format(item.createdAt),
+                text = SimpleDateFormat("HH:mm:aa, dd/MM", Locale.ENGLISH).format(item.createdAt),
                 fontSize = 12.sp,
                 color = Color.LightGray
             )
@@ -233,6 +229,37 @@ fun TodoItem(
                 )
             }
         }
+
+        // Ikonica za zvono
+        IconButton(onClick = { showDialog = true }) {
+            Icon(
+                painter = painterResource(id = R.drawable.baseline_notifications_24), // Zamijenite s ikonom zvona
+                contentDescription = "Notify"
+            )
+        }
+
+        // Prikaz dijaloga za odabir vremena
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                title = { Text(text = "Odaberite vrijeme") },
+                text = {
+                    Column {
+                        TextButton(onClick = { /* logika za 1 sat */ showDialog = false }) {
+                            Text("1 sat")
+                        }
+                        TextButton(onClick = { /* logika za 12 sati */ showDialog = false }) {
+                            Text("12 sati")
+                        }
+                        TextButton(onClick = { /* logika za 24 sata */ showDialog = false }) {
+                            Text("24 sata")
+                        }
+                    }
+                },
+                confirmButton = {}
+            )
+        }
+
         IconButton(onClick = onDelete) {
             Icon(
                 painter = painterResource(id = R.drawable.baseline_delete_24),
