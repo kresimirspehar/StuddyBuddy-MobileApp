@@ -61,14 +61,14 @@ class MainActivity : ComponentActivity() {
                     unselectedIcon = Icons.Outlined.Home
                 ),
                 BottomNavigationItem(
-                    title = "profile",
-                    selectedIcon = Icons.Filled.Person,
-                    unselectedIcon = Icons.Outlined.Person
-                ),
-                BottomNavigationItem(
                     title = "progress",
                     selectedIcon = Icons.Filled.CheckCircle,
                     unselectedIcon = Icons.Outlined.CheckCircle
+                ),
+                BottomNavigationItem(
+                    title = "profile",
+                    selectedIcon = Icons.Filled.Person,
+                    unselectedIcon = Icons.Outlined.Person
                 )
             )
 
