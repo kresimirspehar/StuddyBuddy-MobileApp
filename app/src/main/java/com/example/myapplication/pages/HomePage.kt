@@ -1,6 +1,11 @@
 package com.example.myapplication.pages
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -42,11 +47,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.myapplication.AuthState
 import com.example.myapplication.AuthViewModel
+import com.example.myapplication.NotificationReceiver
 import com.example.myapplication.R
 import com.example.myapplication.Todo
 import com.example.myapplication.TodoViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
+import androidx.compose.ui.platform.LocalContext
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -95,6 +103,7 @@ fun TodoListPage(viewModel: TodoViewModel) {
     var inputText by remember { mutableStateOf("") }
     var editingItem by remember { mutableStateOf<Todo?>(null) } // Stanje za trenutno uređivanje
     var showError by remember { mutableStateOf(false) } // Stanje za prikaz greške
+
 
     Column(
         modifier = Modifier
@@ -180,8 +189,9 @@ fun TodoItem(
     onCancel: () -> Unit,
     onDelete: () -> Unit
 ) {
-    var editText by remember { mutableStateOf(item.title) } // Za praćenje unosa uređivanja
-    var showDialog by remember { mutableStateOf(false) } // Stanje za prikaz dijaloga
+    var editText by remember { mutableStateOf(item.title) }
+    var showDialog by remember { mutableStateOf(false) }
+    var isNotificationActive by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier
@@ -199,7 +209,6 @@ fun TodoItem(
                 color = Color.LightGray
             )
             if (isEditing) {
-                // Prikazuj OutlinedTextField kad uređujemo stavku
                 OutlinedTextField(
                     value = editText,
                     onValueChange = { editText = it },
@@ -208,51 +217,75 @@ fun TodoItem(
                 Row {
                     IconButton(onClick = { onSave(editText) }) {
                         Icon(
-                            painter = painterResource(id = R.drawable.baseline_check_24), // Zamijenite s ikonom kvačice
+                            painter = painterResource(id = R.drawable.baseline_check_24),
                             contentDescription = "Save"
                         )
                     }
                     IconButton(onClick = onCancel) {
                         Icon(
-                            painter = painterResource(id = R.drawable.baseline_cancel_24), // Zamijenite s ikonom za poništavanje
+                            painter = painterResource(id = R.drawable.baseline_cancel_24),
                             contentDescription = "Cancel"
                         )
                     }
                 }
             } else {
-                // Prikazuj samo naziv stavke kad ne uređujemo
                 Text(
                     text = item.title,
                     fontSize = 20.sp,
                     color = Color.White,
-                    modifier = Modifier.clickable { onEdit() } // Klik za uređivanje
+                    modifier = Modifier.clickable { onEdit() }
                 )
             }
         }
 
-        // Ikonica za zvono
         IconButton(onClick = { showDialog = true }) {
             Icon(
-                painter = painterResource(id = R.drawable.baseline_notifications_24), // Zamijenite s ikonom zvona
+                painter = painterResource(id = R.drawable.baseline_notifications_24),
                 contentDescription = "Notify"
             )
         }
 
-        // Prikaz dijaloga za odabir vremena
         if (showDialog) {
             AlertDialog(
                 onDismissRequest = { showDialog = false },
                 title = { Text(text = "Odaberite vrijeme") },
                 text = {
+                    val context = LocalContext.current
+
                     Column {
-                        TextButton(onClick = { /* logika za 1 sat */ showDialog = false }) {
+                        TextButton(onClick = {
+                            setAlarm(context = context, item.title, 1)
+                            isNotificationActive = true // Označi da je notifikacija aktivna
+                            showDialog = false
+                            Toast.makeText(context, "Notifikacija postavljena za 1 sat", Toast.LENGTH_SHORT).show()
+                        }) {
                             Text("1 sat")
                         }
-                        TextButton(onClick = { /* logika za 12 sati */ showDialog = false }) {
+                        TextButton(onClick = {
+                            setAlarm(context = context, item.title, 12)
+                            isNotificationActive = true
+                            showDialog = false
+                            Toast.makeText(context, "Notifikacija postavljena za 12 sati", Toast.LENGTH_SHORT).show()
+                        }) {
                             Text("12 sati")
                         }
-                        TextButton(onClick = { /* logika za 24 sata */ showDialog = false }) {
+                        TextButton(onClick = {
+                            setAlarm(context = context, item.title, 24)
+                            isNotificationActive = true
+                            showDialog = false
+                            Toast.makeText(context, "Notifikacija postavljena za 24 sata", Toast.LENGTH_SHORT).show()
+                        }) {
                             Text("24 sata")
+                        }
+                        // Prikaz "Poništi" samo ako je notifikacija aktivna
+                        if (isNotificationActive) {
+                            TextButton(onClick = {
+                                cancelAlarm(context = context, item.title)
+                                isNotificationActive = false // Oznaci da je notifikacija poništena
+                                showDialog = false
+                            }) {
+                                Text("Poništi")
+                            }
                         }
                     }
                 },
@@ -268,3 +301,44 @@ fun TodoItem(
         }
     }
 }
+
+fun setAlarm(context: Context, title: String, hours: Int) {
+    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    val intent = Intent(context, NotificationReceiver::class.java).apply {
+        putExtra("title", title)
+        putExtra("notificationId", System.currentTimeMillis().toInt())
+    }
+
+    val pendingIntent = PendingIntent.getBroadcast(
+        context,
+        0,
+        intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
+    // Vreme kada će se alarm okinuti (sada + zadani sati)
+    val triggerTime = System.currentTimeMillis() + hours * 60 * 60 * 1000
+
+    // Postavljanje alarma
+    alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
+}
+
+fun cancelAlarm(context: Context, title: String) {
+    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    val intent = Intent(context, NotificationReceiver::class.java).apply {
+        putExtra("title", title)
+    }
+
+    val pendingIntent = PendingIntent.getBroadcast(
+        context,
+        0,
+        intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
+    // Otkazivanje alarma
+    alarmManager.cancel(pendingIntent)
+    Toast.makeText(context, "Notifikacija poništena", Toast.LENGTH_SHORT).show()
+}
+
+
