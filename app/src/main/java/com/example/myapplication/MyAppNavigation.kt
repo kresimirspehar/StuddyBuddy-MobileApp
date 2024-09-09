@@ -1,21 +1,16 @@
 package com.example.myapplication
 
+import Progress
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.pages.HomePage
 import com.example.myapplication.pages.LoginPage
-import com.example.myapplication.pages.Progress
+import com.example.myapplication.pages.Motivation
 import com.example.myapplication.pages.SignupPage
-
-
-
-
 import androidx.navigation.NavHostController
 import com.example.myapplication.pages.Profile
 
@@ -39,6 +34,9 @@ fun MyAppNavigation(
         }
         composable("progress") {
             Progress(modifier, navController, authViewModel)
+        }
+        composable("motivation") {
+            Motivation(modifier, navController, authViewModel)
         }
         composable("profile") {
             Profile(modifier, navController, authViewModel)

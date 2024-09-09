@@ -12,9 +12,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Done
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.BadgedBox
@@ -62,14 +66,20 @@ class MainActivity : ComponentActivity() {
                 ),
                 BottomNavigationItem(
                     title = "progress",
-                    selectedIcon = Icons.Filled.CheckCircle,
-                    unselectedIcon = Icons.Outlined.CheckCircle
+                    selectedIcon = Icons.Filled.Done,
+                    unselectedIcon = Icons.Outlined.Done
+                ),
+                BottomNavigationItem(
+                    title = "motivation",
+                    selectedIcon = Icons.Filled.FavoriteBorder,
+                    unselectedIcon = Icons.Outlined.FavoriteBorder
                 ),
                 BottomNavigationItem(
                     title = "profile",
                     selectedIcon = Icons.Filled.Person,
                     unselectedIcon = Icons.Outlined.Person
-                )
+                ),
+
             )
 
             MyApplicationTheme {
