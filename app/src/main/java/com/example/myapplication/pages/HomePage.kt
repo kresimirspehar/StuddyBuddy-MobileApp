@@ -267,7 +267,7 @@ fun TodoItem(
         if (showDialog) {
             AlertDialog(
                 onDismissRequest = { showDialog = false },
-                title = { Text(text = "Odaberite vrijeme") },
+                title = { Text(text = "Choose time: ") },
                 text = {
                     val context = LocalContext.current
 
@@ -276,25 +276,25 @@ fun TodoItem(
                             setAlarm(context = context, item.title, 1)
                             isNotificationActive = true // Označi da je notifikacija aktivna
                             showDialog = false
-                            Toast.makeText(context, "Notifikacija postavljena za 1 sat", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Notification set for 1 hour", Toast.LENGTH_SHORT).show()
                         }) {
-                            Text("1 sat")
+                            Text("1 hour")
                         }
                         TextButton(onClick = {
                             setAlarm(context = context, item.title, 12)
                             isNotificationActive = true
                             showDialog = false
-                            Toast.makeText(context, "Notifikacija postavljena za 12 sati", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Notification set for 12 hours", Toast.LENGTH_SHORT).show()
                         }) {
-                            Text("12 sati")
+                            Text("12 hours")
                         }
                         TextButton(onClick = {
                             setAlarm(context = context, item.title, 24)
                             isNotificationActive = true
                             showDialog = false
-                            Toast.makeText(context, "Notifikacija postavljena za 24 sata", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Notification set for 24 hours", Toast.LENGTH_SHORT).show()
                         }) {
-                            Text("24 sata")
+                            Text("24 hours")
                         }
                         // Prikaz "Poništi" samo ako je notifikacija aktivna
                         if (isNotificationActive) {
@@ -303,7 +303,7 @@ fun TodoItem(
                                 isNotificationActive = false // Oznaci da je notifikacija poništena
                                 showDialog = false
                             }) {
-                                Text("Poništi")
+                                Text("Cancel")
                             }
                         }
                     }
@@ -357,7 +357,7 @@ fun cancelAlarm(context: Context, title: String) {
 
     // Otkazivanje alarma
     alarmManager.cancel(pendingIntent)
-    Toast.makeText(context, "Notifikacija poništena", Toast.LENGTH_SHORT).show()
+    Toast.makeText(context, "Notification canceled", Toast.LENGTH_SHORT).show()
 }
 
 

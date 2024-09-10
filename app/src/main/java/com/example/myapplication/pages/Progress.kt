@@ -6,10 +6,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
 import com.example.myapplication.AuthViewModel
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 
 @Composable
 fun Progress(
@@ -21,6 +25,12 @@ fun Progress(
     var newSubject by remember { mutableStateOf(TextFieldValue("")) }
     var selectedSubject by remember { mutableStateOf<String?>(null) }
     var notesMap by remember { mutableStateOf(mutableMapOf<String, TextFieldValue>()) }
+
+    // Function to delete a subject
+    fun deleteSubject(subject: String) {
+        subjects = subjects.filter { it != subject }
+        notesMap.remove(subject)
+    }
 
     if (selectedSubject == null) {
         Column(
@@ -36,13 +46,28 @@ fun Progress(
             // List of subjects
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
                 items(subjects) { subject ->
-                    Text(
-                        text = subject,
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { selectedSubject = subject }
-                            .padding(8.dp)
-                    )
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = subject,
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable { selectedSubject = subject }
+                        )
+                        IconButton(
+                            onClick = { deleteSubject(subject) }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Delete",
+                                tint = Color.Gray
+                            )
+                        }
+                    }
                 }
             }
 

@@ -46,8 +46,8 @@ fun Profile(
     authViewModel: AuthViewModel
 ) {
     // State za korisničko ime, email i sliku
-    var username by remember { mutableStateOf("Korisničko Ime") }
-    var email by remember { mutableStateOf("email@primjer.com") }
+    var username by remember { mutableStateOf("Username") }
+    var email by remember { mutableStateOf("email@example.com") }
     var isEditing by remember { mutableStateOf(false) }
     var newUsername by remember { mutableStateOf(username) }
     var newEmail by remember { mutableStateOf(email) }
@@ -103,7 +103,7 @@ fun Profile(
                 TextField(
                     value = newUsername,
                     onValueChange = { newUsername = it },
-                    label = { Text("Korisničko Ime") },
+                    label = { Text("Username") },
                     modifier = Modifier.fillMaxWidth()
                 )
             } else {
@@ -141,13 +141,13 @@ fun Profile(
                     isEditing = false
                     // Ovdje bi dodao funkcionalnost za spremanje promjena u bazu podataka ili ViewModel
                 }) {
-                    Text(text = "Spremi")
+                    Text(text = "Save")
                 }
             } else {
                 Button(onClick = {
                     isEditing = true
                 }) {
-                    Text(text = "Uredi Profil")
+                    Text(text = "Edit profile")
                 }
             }
 
@@ -158,7 +158,7 @@ fun Profile(
                 authViewModel.logout() // Primjer odjave
                 navController.navigate("login") // Navigacija na login ekran
             }) {
-                Text(text = "Odjavi se")
+                Text(text = "Sign out")
             }
         }
     }

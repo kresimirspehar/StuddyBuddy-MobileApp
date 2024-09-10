@@ -75,7 +75,7 @@ fun Motivation(modifier: Modifier, navController: NavHostController, authViewMod
                 },
                 enabled = currentIndex > 0 // Disable dugme na prvom citatu
             ) {
-                Text("Prethodni")
+                Text("Before")
             }
 
             // Dugme za sledeći citat
@@ -87,7 +87,7 @@ fun Motivation(modifier: Modifier, navController: NavHostController, authViewMod
                 },
                 enabled = currentIndex < quotes.size - 1 // Disable dugme na poslednjem citatu
             ) {
-                Text("Sljedeći")
+                Text("Next")
             }
         }
     }
