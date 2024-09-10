@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import Motivation
 import Progress
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -9,7 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.myapplication.pages.HomePage
 import com.example.myapplication.pages.LoginPage
-import com.example.myapplication.pages.Motivation
+
 import com.example.myapplication.pages.SignupPage
 import androidx.navigation.NavHostController
 import com.example.myapplication.pages.Profile
